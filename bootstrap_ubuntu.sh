@@ -45,25 +45,23 @@ if [[ $USER != "root" ]]; then
 fi
 
 
-read -r -d '' BASHRC_CONTENT << EOM
+BASHRC_CONTENT="$(cat << 'EOF'
 aws_usaf () {
     export AWS_PROFILE=jcsda-usaf-us-east-2
-    export EC2_PEM="${TARGET_USER_DIR}/.ssh/eparker-usaf-us-east-2.pem"
+    export EC2_PEM=${HOME}}/.ssh/eparker-usaf-us-east-2.pem
 }
-
 aws_noaa () {
     export AWS_PROFILE=jcsda-noaa-us-east-1
-    export EC2_PEM="${TARGET_USER_DIR}/.ssh/eparker-noaa-us-east-1.pem"
+    export EC2_PEM=${HOME}/.ssh/eparker-noaa-us-east-1.pem
 }
-
 aws_usaf
-
-export GITHUB_APP_PRIVATE_KEY=${TARGET_USER_DIR}/.ssh/jcsda-ci.2023-04-19.private-key.pem
+export GITHUB_APP_PRIVATE_KEY=${HOME}/.ssh/jcsda-ci.2023-04-19.private-key.pem
 export GITHUB_APP_ID=321361
 export GITHUB_INSTALL_ID=36634387
-export GITHUB_TOKEN_FILE="${TARGET_USER_DIR}/.config/gh/eap_pat.txt"
-export GITHUB_TOKEN="$(cat $GITHUB_TOKEN_FILE)" 
-EOM
+export GITHUB_TOKEN_FILE=${HOME}/.config/gh/eap_pat.txt
+export GITHUB_TOKEN=$(cat $GITHUB_TOKEN_FILE)
+EOF
+)"
 
 set -o errexit
 set -x
@@ -115,7 +113,7 @@ install_spack_prereq () {
 
 setup_environ () {
     echo "Setting up ${TARGET_USER} home at ${TARGET_USER_DIR}"
-    if [[ grep -q "AWS_PROFILE" $TARGET_USER_DIR/.bashrc ]]; then
+    if grep -q "AWS_PROFILE" $TARGET_USER_DIR/.bashrc ; then
         echo "++ User directory already setup"
         return 0
     fi
