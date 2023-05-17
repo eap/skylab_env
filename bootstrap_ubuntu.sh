@@ -19,7 +19,7 @@ Optional:
   * TARGET_USER_DIR: Override /home/ubuntu target user dir.
 
 Use:
-  NOSPACK=1 sudo ./bootstrap_ubuntu.sh
+  sudo NOSPACK=1 ./bootstrap_ubuntu.sh
 EOM
 
 print_help () {

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# This shell script is to be run on the primary developer machine to
+# push credentials and other secrets. These secrets are transiently
+# used on the target host's elastic volume, but they should be deleted
+# from the remote when the work is done. Ideally the remote itself
+# will have its volumes garbage collected.
+
+
 TARGET_USER=ubuntu
 TARGET_USER_DIR=/home/ubuntu
 
