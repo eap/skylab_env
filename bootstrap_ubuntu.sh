@@ -37,7 +37,6 @@ if [[ $1 == "-h" ]] ||  [[ $1 == "help" ]] ; then
 fi
 
 
-set -o errexit
 
 echo "Bootstrapping an ubuntu instance."
 if [[ $USER != "root" ]]; then
@@ -66,8 +65,11 @@ export GITHUB_TOKEN_FILE="${TARGET_USER_DIR}/.config/gh/eap_pat.txt"
 export GITHUB_TOKEN="$(cat $GITHUB_TOKEN_FILE)" 
 EOM
 
+set -o errexit
+set -x
 
 install_basics () {
+    echo "updating apt"
     apt update
     echo "installing true basics"
     apt install -y \
