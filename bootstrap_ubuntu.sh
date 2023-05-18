@@ -28,6 +28,8 @@ print_help () {
 
 if [ -z "${SPACK}" ] && [ -z "${NOSPACK}" ] ; then
     print_help
+    echo
+    echo "ERROR: required SPACK/NOSPACK parameter missing"
     exit 1
 fi
 
@@ -49,10 +51,12 @@ BASHRC_CONTENT="$(cat << 'EOF'
 aws_usaf () {
     export AWS_PROFILE=jcsda-usaf-us-east-2
     export EC2_PEM=${HOME}}/.ssh/eparker-usaf-us-east-2.pem
+    aws ecr get-login-password --region region | docker login --username AWS --password-stdin 469205354006.dkr.ecr.us-east-1.amazonaws.com
 }
 aws_noaa () {
     export AWS_PROFILE=jcsda-noaa-us-east-1
     export EC2_PEM=${HOME}/.ssh/eparker-noaa-us-east-1.pem
+    aws ecr get-login-password --region region | docker login --username AWS --password-stdin 747101682576.dkr.ecr.us-east-2.amazonaws.com
 }
 aws_usaf
 export GITHUB_APP_PRIVATE_KEY=${HOME}/.ssh/jcsda-ci.2023-04-19.private-key.pem
@@ -74,7 +78,6 @@ install_basics () {
                 ca-certificates \
                 curl \
                 gnupg \
-                awscli \
                 git \
                 git-lfs \
                 bzip2 \
@@ -82,6 +85,11 @@ install_basics () {
                 python3 \
                 python3-pip \
                 pico
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+    pushd /tmp
+    unzip awscliv2.zip
+    ./aws/install
+    popd
 }
 
 install_spack_prereq () {
@@ -102,8 +110,9 @@ install_spack_prereq () {
                  xterm \
                  libcurl4-openssl-dev \
                  libssl-dev \
-                 mysql-server \
-                 libmysqlclient-dev \
+                 mysql-server=8.0.28-0ubuntu4 \
+                 libmysqlclient-dev=8.0.28-0ubuntu4 \
+                 libmysqlclient21=8.0.28-0ubuntu4 \
                  python3-dev
 
     echo
@@ -118,7 +127,17 @@ setup_environ () {
         return 0
     fi
     echo "${BASHRC_CONTENT}" >> "${TARGET_USER_DIR}/.bashrc"
+}
 
+setup_git () {
+    GITHUB_TOKEN_FILE=${TARGET_USER_DIR}/.config/gh/eap_pat.txt
+    GITHUB_TOKEN="$(cat $GITHUB_TOKEN_FILE)"
+    echo '#!/bin/bash' > ${TARGET_USER_DIR}/.config/gh/askpass.sh
+    echo "echo ${GITHUB_TOKEN}" >> ${TARGET_USER_DIR}/.config/gh/askpass.sh
+    chmod +x ${TARGET_USER_DIR}/.config/gh/askpass.sh
+
+    sudo -u $TARGET_USER git config --global user.name "eap"
+    sudo -u $TARGET_USER git config --global core.askPass ${TARGET_USER_DIR}/.config/gh/askpass.sh
 }
 
 installdocker () {
@@ -151,7 +170,9 @@ installdocker () {
     echo "running post-install"
     echo
 
-    groupadd docker
+    if ! grep -q -E "^docker:" /etc/group ; then
+        groupadd docker
+    fi
     usermod -aG docker $TARGET_USER
     usermod -aG docker $USER
     newgrp docker
@@ -162,12 +183,12 @@ installdocker () {
 }
 
 
-install_basics
-setup_environ
+#install_basics
+#setup_environ
 if [ -n $SPACK ]; then
     install_spack_prereq
-}
+fi
 installdocker
-
+setup_git
 
 
