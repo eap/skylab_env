@@ -14,6 +14,15 @@ Use:
   VERSION=develop SKYLAB=dev ./build_spack_env.sh
 EOM
 
+if [ -z "${VERSION}" ]; then
+    echo "${HELP_CONTENT}"
+    echo "Use error: VERSION not set"
+fi
+if [ -z "${SKYLAB}" ]; then
+    echo "${HELP_CONTENT}"
+    echo "Use error: SKYLAB NOT SET"
+fi
+
 if [ -z "${TEMPLATE}" ]; then
     TEMPLATE=skylab-dev
 fi
@@ -23,7 +32,7 @@ set -x
 
 
 cd $HOME
-git clone -b $VERSION --recursive https://github.com/noaa-emc/spack-stack $VERSION
+git clone -b $VERSION --recursive https://github.com/jcsda/spack-stack spack-stack-$VERSION
 cd spack-stack-$VERSION
 
 source setup.sh
@@ -32,7 +41,7 @@ source setup.sh
 spack stack create env --site=linux.default --template=$TEMPLATE --name=skylab-$SKYLAB
 spack env activate -p envs/skylab-$SKYLAB
 
-export SPACK_SYSTEM_CONFIG_PATH="${HOME}/spack-stack-${VERSION}/envs/skylab-${SKLYAB}/site"
+export SPACK_SYSTEM_CONFIG_PATH="${HOME}/spack-stack-${VERSION}/envs/skylab-${SKYLAB}/site"
 
 
 spack external find --scope system
@@ -61,8 +70,10 @@ spack config add "packages:all:compiler:[gcc@${GCC_VERSION}]"
 read -r -d '' END_CONTENT << EOM
 # Run the following commands.
 cd ~/spack-stack-${VERSION}
+spack env activate -p envs/skylab-$SKYLAB
+source setup.sh
 spack concretize > concretize.log
-nohup bash -c "spack env activate -p envs/skylab-$SKYLAB & spack install --verbose --fail-fast 2>&1 > install.log" &
+nohup bash -c "source setup.sh & spack env activate -p envs/skylab-$SKYLAB & spack install --verbose --fail-fast 2>&1 > install.log" &
 EOM
 
-echo $END_CONTENT
+echo "${END_CONTENT}"
