@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 read -r -d '' HELP_CONTENT << EOM
 This script will build a spack-stack environment from scratch.
 
@@ -14,22 +15,24 @@ Use:
 EOM
 
 if [ -z "${TEMPLATE}" ]; then
-	TEMPLATE=skylab-dev
+    TEMPLATE=skylab-dev
 fi
+
+set -o errexit
+set -x
 
 
 cd $HOME
-git clone --recursive https://github.com/jcsda/spack-stack.git
-cd spack-stack
+git clone -b $VERSION --recursive https://github.com/noaa-emc/spack-stack $VERSION
+cd spack-stack-$VERSION
 
-git checkout $VERSION
 source setup.sh
 
 
-spack stack create env --site=linux.default --template=skylab-dev --name=skylab-$VERSION
-spack env activate -p envs/skylab-$VERSION
+spack stack create env --site=linux.default --template=$TEMPLATE --name=skylab-$SKYLAB
+spack env activate -p envs/skylab-$SKYLAB
 
-export SPACK_SYSTEM_CONFIG_PATH="${HOME}/spack-stack/envs/skylab-${VERSION}/site"
+export SPACK_SYSTEM_CONFIG_PATH="${HOME}/spack-stack-${VERSION}/envs/skylab-${SKLYAB}/site"
 
 
 spack external find --scope system
@@ -51,24 +54,15 @@ GCC_VERSION="$(gcc --version | grep -o -m1 -P "\d{1,2}\.\d{1,2}\.\d{1,2}$")"
 
 
 # Ubuntu 22.04 do this.
-sed -i 's/tcl/lmod/g' ${HOME}/spack-stack/envs/skylab-4/site/modules.yaml
+sed -i 's/tcl/lmod/g' ${HOME}/spack-stack-${VERSION}/envs/skylab-${SKYLAB}/site/modules.yaml
 spack config add "packages:all:providers:mpi:[mpich@4.0.2]"
 spack config add "packages:all:compiler:[gcc@${GCC_VERSION}]"
 
-# If running older ubuntu or redhat.
-# both: don't "s/tcl/lmod/"
-# Redhat: spack config add "packages:all:providers:mpi:[openmpi@4.1.4]"
-# 
+read -r -d '' END_CONTENT << EOM
+# Run the following commands.
+cd ~/spack-stack-${VERSION}
+spack concretize > concretize.log
+nohup bash -c "spack env activate -p envs/skylab-$SKYLAB & spack install --verbose --fail-fast 2>&1 > install.log" &
+EOM
 
-
-if [ -z "${SPACK}" ] && [ -z "${NOSPACK}" ] ; then
-    print_help
-    echo
-    echo "ERROR: required SPACK/NOSPACK parameter missing"
-    exit 1
-fi
-
-
-
-git clone --recursive https://github.com/jcsda/spack-stack.git
-git clone --recursive https://github.com/jcsda/spack-stack.git
+echo $END_CONTENT
