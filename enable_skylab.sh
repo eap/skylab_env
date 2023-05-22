@@ -8,15 +8,30 @@
 # This is only needed during initial setup.
 #export SPACK_SYSTEM_CONFIG_PATH="${HOME}/git/spack-stack/envs/skylab-3.0.0/site"
 
+if [ -z "${SPACK_STACK_DIR}" ]; then
+    echo
+    echo
+    echo "Error: SPACK_STACK_DIR not set"
+    echo
+fi
+if [ -z "${SPACK_STACK_MODULE_ROOT}" ]; then
+    echo
+    echo
+    echo "Error: SPACK_STACK_MODULE_ROOT not set"
+    echo
+fi
 
-source /usr/local/opt/lmod/init/profile
+
+if grep -q "Darwin" <<< "$(uname -a)" ; then
+    source /usr/local/opt/lmod/init/profile
+fi
 module purge
-source /Users/eparker/git/spack-stack/setup.sh
+source $SPACK_STACK_DIR/setup.sh
 export SPACK_STACK_ROOT=/Users/eparker/git/spack-stack
 
 #spack env activate -p envs/skylab-dev
 
-module use /Users/eparker/git/spack-stack/envs/skylab-dev/install/modulefiles/Core
+module use $SPACK_STACK_MODULE_ROOT/Core
 module load stack-apple-clang
 module load stack-openmpi
 module load stack-python
