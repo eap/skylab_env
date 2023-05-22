@@ -27,7 +27,7 @@ if grep -q "Darwin" <<< "$(uname -a)" ; then
 fi
 module purge
 source $SPACK_STACK_DIR/setup.sh
-export SPACK_STACK_ROOT=/Users/eparker/git/spack-stack
+export SPACK_STACK_ROOT=$SPACK_STACK_DIR
 
 #spack env activate -p envs/skylab-dev
 

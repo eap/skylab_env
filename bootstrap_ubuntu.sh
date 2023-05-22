@@ -111,7 +111,7 @@ install_spack_prereq () {
                 gdb
 
     echo "installing environment modules"
-    apt install -y environment-modules
+    apt install -y lmod
 
     apt install -y build-essential \
                  libkrb5-dev \
