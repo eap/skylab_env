@@ -67,7 +67,8 @@ fi
 
 #!/bin/bash
 
-if [ -d $JEDI_ROOT ]; then
+# JEDI_ROOT var must be defined and must be a directory.
+if [ ! -z $JEDI_ROOT ] && [ -d $JEDI_ROOT ];; then
   # Set host name for R2D2/EWOK
 
   # On Orion:
@@ -96,8 +97,10 @@ if [ -d $JEDI_ROOT ]; then
   fi
 
   # Add ioda python bindings to PYTHONPATH
-  PYTHON_VERSION=`python3 -c 'import sys; version=sys.version_info[:2]; print("{0}.{1}".format(*version))'`
-  export PYTHONPATH="${JEDI_BUILD}/lib/python${PYTHON_VERSION}/pyioda:${PYTHONPATH}"
+  if [ -d "${JEDI_BUILD}/lib/python${PYTHON_VERSION}" ]; then
+    PYTHON_VERSION=`python3 -c 'import sys; version=sys.version_info[:2]; print("{0}.{1}".format(*version))'`
+    export PYTHONPATH="${JEDI_BUILD}/lib/python${PYTHON_VERSION}/pyioda:${PYTHONPATH}"
+  fi
 
   # necessary user directories for ewok and ecFlow files
   mkdir -p $EWOK_WORKDIR $EWOK_FLOWDIR
