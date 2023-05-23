@@ -36,10 +36,12 @@ module use $SPACK_STACK_MODULE_ROOT/Core
 if grep -q "Darwin" <<< "$(uname -a)" ; then
   module load stack-apple-clang
   module load stack-openmpi
+  export PS1="\033[1;34m(skylab-dev)\033[0m $(cut -c 8- <<< $PS1)"
 fi
 if grep -q "Ubuntu" <<< "$(uname -a)" ; then
   module load stack-gcc
   module load stack-mpich
+  export PS1="\033[1;34m(skylab-dev)\033[0m ${PS1}"
 fi
 
 
@@ -56,7 +58,8 @@ if [ -f $HOME/jedi-bundle/venv/bin/activate ]; then
   source $HOME/jedi-bundle/venv/bin/activate
 fi
 
-export PS1="\033[1;34m(skylab-dev)\033[0m $(cut -c 8- <<< $PS1)"
+
+
 
 
 
