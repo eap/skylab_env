@@ -110,8 +110,9 @@ install_spack_prereq () {
                 gfortran \
                 gdb
 
-    echo "installing environment modules"
-    apt install -y lmod
+    #echo "installing environment modules"
+    #apt install -y lmod
+    apt install -y environment-modules
 
     apt install -y build-essential \
                  libkrb5-dev \
@@ -193,8 +194,8 @@ installdocker () {
 }
 
 
-#install_basics
-#setup_environ
+install_basics
+setup_environ
 if [ -n $SPACK ]; then
     install_spack_prereq
 fi
