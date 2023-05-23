@@ -26,21 +26,35 @@ if grep -q "Darwin" <<< "$(uname -a)" ; then
     source /usr/local/opt/lmod/init/profile
 fi
 module purge
-source $SPACK_STACK_DIR/setup.sh
-export SPACK_STACK_ROOT=$SPACK_STACK_DIR
 
-#spack env activate -p envs/skylab-dev
+# Not needed but can be useful if debugging or updating spack stack.
+# source $SPACK_STACK_DIR/setup.sh
+# spack env activate -p envs/skylab-dev
 
 module use $SPACK_STACK_MODULE_ROOT/Core
-module load stack-apple-clang
-module load stack-openmpi
+
+if grep -q "Darwin" <<< "$(uname -a)" ; then
+  module load stack-apple-clang
+  module load stack-openmpi
+fi
+if grep -q "Ubuntu" <<< "$(uname -a)" ; then
+  module load stack-gcc
+  module load stack-mpich
+fi
+
+
 module load stack-python
 module load jedi-base-env
 module load jedi-fv3-env
 module load jedi-ewok-env
 
 # Activate skylab venv
-source /Users/eparker/git/jedi-bundle/venv/bin/activate
+if [ -f $HOME/git/jedi-bundle/venv/bin/activate ]; then
+  source $HOME/git/jedi-bundle/venv/bin/activate
+fi
+if [ -f $HOME/jedi-bundle/venv/bin/activate ]; then
+  source $HOME/jedi-bundle/venv/bin/activate
+fi
 
 export PS1="\033[1;34m(skylab-dev)\033[0m $(cut -c 8- <<< $PS1)"
 

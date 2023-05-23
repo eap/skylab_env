@@ -14,6 +14,26 @@ Use:
   VERSION=develop SKYLAB=dev ./build_spack_env.sh
 EOM
 
+read -r -d '' END_CONTENT << EOM
+# Run the following commands.
+cd ~/spack-stack-${VERSION}
+spack env activate -p envs/skylab-$SKYLAB
+source setup.sh
+spack concretize > concretize.log
+nohup bash -c "source setup.sh & spack env activate -p envs/skylab-$SKYLAB & spack install --verbose --fail-fast 2>&1 > install.log" &
+spack module lmod refresh
+spack stack setup-meta-modules
+EOM
+
+read -r -d '' BASHRC_CONTENT << EOM
+# Setup spack stack vars
+
+export SPACK_STACK_DIR=${HOME}/spack-stack-${VERSION}
+export SPACK_STACK_MODULE_ROOT=${HOME}/spack-stack-${VERSION}/envs/skylab-${SKYLAB}/install/modulefiles/Core
+
+EOM
+
+
 if [ -z "${VERSION}" ]; then
     echo "${HELP_CONTENT}"
     echo "Use error: VERSION not set"
@@ -27,9 +47,11 @@ if [ -z "${TEMPLATE}" ]; then
     TEMPLATE=skylab-dev
 fi
 
+
 set -o errexit
 set -x
 
+echo "${BASHRC_CONTENT}" >> "${HOME}/.bashrc"
 
 cd $HOME
 git clone -b $VERSION --recursive https://github.com/jcsda/spack-stack spack-stack-$VERSION
@@ -63,17 +85,12 @@ GCC_VERSION="$(gcc --version | grep -o -m1 -P "\d{1,2}\.\d{1,2}\.\d{1,2}$")"
 
 
 # Ubuntu 22.04 do this.
-sed -i 's/tcl/lmod/g' ${HOME}/spack-stack-${VERSION}/envs/skylab-${SKYLAB}/site/modules.yaml
+# sed -i 's/tcl/lmod/g' ${HOME}/spack-stack-${VERSION}/envs/skylab-${SKYLAB}/site/modules.yaml
 spack config add "packages:all:providers:mpi:[mpich@4.0.2]"
 spack config add "packages:all:compiler:[gcc@${GCC_VERSION}]"
 
-read -r -d '' END_CONTENT << EOM
-# Run the following commands.
-cd ~/spack-stack-${VERSION}
-spack env activate -p envs/skylab-$SKYLAB
-source setup.sh
-spack concretize > concretize.log
-nohup bash -c "source setup.sh & spack env activate -p envs/skylab-$SKYLAB & spack install --verbose --fail-fast 2>&1 > install.log" &
-EOM
+set +x
 
+sleep 2
+echo
 echo "${END_CONTENT}"
