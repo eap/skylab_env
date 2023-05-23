@@ -68,7 +68,7 @@ fi
 #!/bin/bash
 
 # JEDI_ROOT var must be defined and must be a directory.
-if [ ! -z $JEDI_ROOT ] && [ -d $JEDI_ROOT ];; then
+if [ ! -z $JEDI_ROOT ] && [ -d $JEDI_ROOT ]; then
   # Set host name for R2D2/EWOK
 
   # On Orion:
