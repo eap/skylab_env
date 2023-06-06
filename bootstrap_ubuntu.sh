@@ -138,6 +138,10 @@ setup_environ () {
         return 0
     fi
     echo "${BASHRC_CONTENT}" >> "${TARGET_USER_DIR}/.bashrc"
+    
+    # Uncomment the history search stuff in the inputrc.
+    sudo sed -i 's/# "\\e\[5~": history-search/"\\e\[5~": history-search/' /etc/inputrc
+    sudo sed -i 's/# "\\e\[6~": history-search/"\\e\[6~": history-search/' /etc/inputrc
 }
 
 setup_git () {
