@@ -61,12 +61,14 @@ fi
 aws_usaf () {
     export AWS_PROFILE=jcsda-usaf-us-east-2
     export EC2_PEM=${HOME}}/.ssh/eparker-usaf-us-east-2.pem
-    aws ecr get-login-password --region region | docker login --username AWS --password-stdin 469205354006.dkr.ecr.us-east-1.amazonaws.com
+    export AWS_DEFAULT_REGION=us-east-2
+    aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 469205354006.dkr.ecr.us-east-1.amazonaws.com
 }
 aws_noaa () {
     export AWS_PROFILE=jcsda-noaa-us-east-1
     export EC2_PEM=${HOME}/.ssh/eparker-noaa-us-east-1.pem
-    aws ecr get-login-password --region region | docker login --username AWS --password-stdin 747101682576.dkr.ecr.us-east-2.amazonaws.com
+    export AWS_DEFAULT_REGION=us-east-1
+    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 747101682576.dkr.ecr.us-east-2.amazonaws.com
 }
 aws_usaf
 export GITHUB_APP_PRIVATE_KEY=${HOME}/.ssh/jcsda-ci.2023-04-19.private-key.pem
