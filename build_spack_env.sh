@@ -10,18 +10,19 @@ Required:
   * TEMPLATE: the name of the template, defaults to "skylab-dev"
 
 Use:
-  VERSION=1.3.1 SKYLAB=4 ./build_spack_env.sh
+  VERSION=1.4.0 SKYLAB=5 ./build_spack_env.sh
   VERSION=develop SKYLAB=dev ./build_spack_env.sh
 EOM
 
 read -r -d '' END_CONTENT << EOM
 # Run the following commands.
 cd ~/spack-stack-${VERSION}
-spack env activate -p envs/skylab-$SKYLAB
 source setup.sh
+spack env activate -p envs/skylab-$SKYLAB
 spack concretize > concretize.log
 nohup bash -c "source setup.sh & spack env activate -p envs/skylab-$SKYLAB & spack install --verbose --fail-fast 2>&1 > install.log" &
-spack module lmod refresh
+# Only do this if using lmod: spack module lmod refresh
+spack module tcl refresh
 spack stack setup-meta-modules
 EOM
 
@@ -86,7 +87,7 @@ GCC_VERSION="$(gcc --version | grep -o -m1 -P "\d{1,2}\.\d{1,2}\.\d{1,2}$")"
 
 # Ubuntu 22.04 do this.
 # sed -i 's/tcl/lmod/g' ${HOME}/spack-stack-${VERSION}/envs/skylab-${SKYLAB}/site/modules.yaml
-spack config add "packages:all:providers:mpi:[mpich@4.0.2]"
+spack config add "packages:all:providers:mpi:[mpich@4.1.1]"
 spack config add "packages:all:compiler:[gcc@${GCC_VERSION}]"
 
 set +x
