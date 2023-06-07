@@ -93,7 +93,8 @@ GCC_VERSION="$(gcc --version | grep -o -m1 -P "\d{1,2}\.\d{1,2}\.\d{1,2}$")"
 
 # Ubuntu 22.04 do this.
 # sed -i 's/tcl/lmod/g' ${HOME}/spack-stack-${VERSION}/envs/skylab-${SKYLAB}/site/modules.yaml
-spack config add "packages:all:providers:mpi:[mpich@4.1.1]"
+# spack config add "packages:all:providers:mpi:[mpich@4.1.1]"
+spack config add "packages:all:providers:mpi:[openmpi@4.1.5]"
 spack config add "packages:all:compiler:[gcc@${GCC_VERSION}]"
 
 set +x
