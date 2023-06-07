@@ -95,6 +95,7 @@ install_basics () {
                 python3 \
                 python3-pip \
                 nano
+    sudo -u $TARGET_USER git lfs install
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
     pushd /tmp
     unzip awscliv2.zip
