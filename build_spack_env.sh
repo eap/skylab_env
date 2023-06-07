@@ -82,6 +82,12 @@ spack compiler find --scope system
 #Do not forget to unset the SPACK_SYSTEM_CONFIG_PATH environment variable!
 unset SPACK_SYSTEM_CONFIG_PATH
 
+# Needed for some builds. Note the "-fPIC" flag is rarely harmful and often helpful.
+# Adjust the optimization accordingly, this is set for balance of performance and
+# acceptable build time. Setting to O3 is best for running experiments.
+sed -i "s/flags: {}/flags:\n      cflags: -O2 -fPIC\n      cxxflags: -O2 -fPIC\n      cppflags: -O2 -fPIC/" \
+       envs/skylab-$SKYLAB/site/compilers.yaml
+
 GCC_VERSION="$(gcc --version | grep -o -m1 -P "\d{1,2}\.\d{1,2}\.\d{1,2}$")"
 
 
