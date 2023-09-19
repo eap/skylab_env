@@ -38,9 +38,13 @@ if [[ $1 == "-h" ]] ||  [[ $1 == "help" ]] ; then
     exit 0
 fi
 
-
-
 echo "Bootstrapping an ubuntu instance."
+
+if grep -q "eap-dev-setup-complete" $TARGET_USER_DIR/.bashrc; then
+    echo "This script should not be run twice; exiting now"
+    exit 1
+fi
+
 if [[ $USER != "root" ]]; then
     echo "This script Must be run with sudo."
     exit 1
@@ -48,16 +52,7 @@ fi
 
 
 BASHRC_CONTENT="$(cat << 'EOF'
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
-fi
+# Indicator string to prevent redundant setup: eap-dev-setup-complete
 aws_usaf () {
     export AWS_PROFILE=jcsda-usaf-us-east-2
     export EC2_PEM=${HOME}}/.ssh/eparker-usaf-us-east-2.pem
@@ -175,11 +170,11 @@ installdocker () {
 
     apt-get update
 
-    apt-get install docker-ce \
-                    docker-ce-cli \
-                    containerd.io \
-                    docker-buildx-plugin \
-                    docker-compose-plugin
+    apt-get install -y docker-ce \
+                       docker-ce-cli \
+                       containerd.io \
+                       docker-buildx-plugin \
+                       docker-compose-plugin
 
     docker run hello-world
 
