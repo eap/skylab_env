@@ -15,6 +15,9 @@ Required:
                    they will not be installed.
 
 Optional:
+  * BASHRC=1: Update the bashrc.
+  * DOCKER=1: add a docker install.
+  * EAP_GIT=1: Use @eap custom git credentials.
   * TARGET_USER: Override "ubuntu" target user.
   * TARGET_USER_DIR: Override /home/ubuntu target user dir.
 
@@ -98,6 +101,10 @@ install_basics () {
     unzip awscliv2.zip
     ./aws/install
     popd
+
+    # Uncomment the history search stuff in the inputrc.
+    sudo sed -i 's/# "\\e\[5~": history-search/"\\e\[5~": history-search/' /etc/inputrc
+    sudo sed -i 's/# "\\e\[6~": history-search/"\\e\[6~": history-search/' /etc/inputrc
 }
 
 install_spack_prereq () {
@@ -129,17 +136,13 @@ install_spack_prereq () {
     echo 
 }
 
-setup_environ () {
+setup_bashrc () {
     echo "Setting up ${TARGET_USER} home at ${TARGET_USER_DIR}"
     if grep -q "AWS_PROFILE" $TARGET_USER_DIR/.bashrc ; then
         echo "++ User directory already setup"
         return 0
     fi
     echo "${BASHRC_CONTENT}" >> "${TARGET_USER_DIR}/.bashrc"
-    
-    # Uncomment the history search stuff in the inputrc.
-    sudo sed -i 's/# "\\e\[5~": history-search/"\\e\[5~": history-search/' /etc/inputrc
-    sudo sed -i 's/# "\\e\[6~": history-search/"\\e\[6~": history-search/' /etc/inputrc
 }
 
 setup_git () {
@@ -197,11 +200,16 @@ installdocker () {
 
 
 install_basics
-setup_environ
+if [ -n $BASHRC ]; then
+    setup_bashrc
+fi
 if [ -n $SPACK ]; then
     install_spack_prereq
 fi
-installdocker
-setup_git
-
+if [ -n $DOCKER ]; then
+    installdocker
+fi
+if [ -n $EAP_GIT ]; then
+    setup_git
+fi
 
