@@ -41,6 +41,8 @@ if [[ $1 == "-h" ]] ||  [[ $1 == "help" ]] ; then
     exit 0
 fi
 
+export DEBIAN_FRONTEND=noninteractive
+
 echo "Bootstrapping an ubuntu instance."
 
 if grep -q "eap-dev-setup-complete" $TARGET_USER_DIR/.bashrc; then
