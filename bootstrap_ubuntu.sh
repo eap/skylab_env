@@ -10,7 +10,7 @@ This script is controlled with shell variables. Many have reasonable assumptions
 but a few are required. This script must be run as root.
 
 Required:
-  * SPACK|NOSPACK: If SPACK is set, then prerequisisites for installing
+  * SPACK|NOSPACK: If SPACK is set, then prerequisites for installing
                    spack-stack will be installed. If NOSPACK is set then
                    they will not be installed.
 
@@ -200,16 +200,25 @@ installdocker () {
 
 
 install_basics
-if [ -n $BASHRC ]; then
+
+if [ -n "${BASHRC}" ]; then
     setup_bashrc
+else
+    echo "skipping bashrc edits"
 fi
-if [ -n $SPACK ]; then
+if [ -n "${SPACK}" ]; then
     install_spack_prereq
+else
+    echo "skipping spack prerequisites install"
 fi
-if [ -n $DOCKER ]; then
+if [ -n "${DOCKER}" ]; then
     installdocker
+else
+    echo "skipping docker install"
 fi
-if [ -n $EAP_GIT ]; then
+if [ -n "${EAP_GIT}" ]; then
     setup_git
+else
+    echo "skipping git install"
 fi
 
