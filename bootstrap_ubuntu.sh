@@ -198,6 +198,10 @@ install_spack_prereq () {
                  automake \
                  cmake \
                  xterm \
+                 autopoint \
+                 texlive \
+                 gettext \
+                 meson \
                  libcurl4-openssl-dev \
                  libssl-dev \
                  mysql-server=8.0.28-0ubuntu4 \
@@ -243,6 +247,9 @@ install_after_download() {
     local description=$2
     shift 2
 
+    # take the script file name like "tbb.sh" and convert to "install.tbb.log".
+    local log_file="install.$(echo "$1" | sed s#\.sh#\.log#g)"
+
     # Wait for the background process to complete
     wait $pid
     local exit_status=$?
@@ -250,7 +257,7 @@ install_after_download() {
     if [ $exit_status -eq 0 ]; then
         echo "Download for $description was successful."
         # Execute the install command
-        sh "$@"
+        sh "$@" 2>&1 | tee $log_file
     else
         echo "Download for $description failed."
         exit 1
@@ -276,8 +283,8 @@ install_intel() {
     math_pid=$!
 
     # Install the Intel assets.
-    sh cpp-compiler.sh --log ${PWD}/cpp.log -a --silent --eula accept
-    install_after_download $fortran_pid "Intel Fortran compiler" fortran-compiler.sh --log ${PWD}/fortran.log -a --silent --eula accept
+    sh cpp-compiler.sh -a --silent --eula accept 2>&1 | tee install.cpp-compiler.log
+    install_after_download $fortran_pid "Intel Fortran compiler" fortran-compiler.sh -a --silent --eula accept
     install_after_download $tbb_pid "Intel Thread Building Blocks" tbb.sh -a --silent --eula accept
     install_after_download $mpi_pid "Intel MPI" mpi.sh -a --silent --eula accept
     install_after_download $math_pid "Intel Math Kernel Lib. (oneMKL)" math.sh -a --silent --eula accept
