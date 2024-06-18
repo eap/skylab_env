@@ -12,6 +12,9 @@ Options:
 
   --intel,-i     Install Intel/OneAPI compilers and IntelMPI (default false).
 
+  --lmod,-l      Install lua and lmod. If not set, environment-modules will be
+                 installed instead
+
   --docker,-d    Install and configure docker (default false).
 
   --eap-auth,-e  Setup auth helpers and environment specific to @eap. This
@@ -41,6 +44,7 @@ INSTALL_SPACK_REQUIREMENTS="not-set"
 INSTALL_INTEL=false
 INSTALL_DOCKER=false
 EAP_AUTH=false
+INSTALL_LMOD=false
 TARGET_USER=ubuntu
 TARGET_USER_DIR='not-set'
 
@@ -54,6 +58,10 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --nospack)
             INSTALL_SPACK_REQUIREMENTS=false
+            shift 1
+            ;;
+        --lmod|-l)
+            INSTALL_LMOD=true
             shift 1
             ;;
         --intel|-i)
@@ -189,8 +197,9 @@ install_spack_prereq () {
                 gdb
 
     #echo "installing environment modules"
+    # Done in a separate section
     #apt install -y lmod
-    apt install -y environment-modules
+    #apt install -y environment-modules
 
     apt install -y build-essential \
                  libkrb5-dev \
@@ -334,8 +343,37 @@ installdocker () {
     echo
 }
 
+install_lmod() {
+    # Install lua/lmod manually, because apt only has older versions
+    # that are not compatible with the modern lua modules spack produces
+    # https://lmod.readthedocs.io/en/latest/030_installing.html#install-lua-x-y-z-tar-gz
+    mkdir -p /opt/lua/5.1.4.9/src
+    cd /opt/lua/5.1.4.9/src
+    wget https://sourceforge.net/projects/lmod/files/lua-5.1.4.9.tar.bz2
+    tar -xvf lua-5.1.4.9.tar.bz2
+    cd lua-5.1.4.9
+    ./configure --prefix=/opt/lua/5.1.4.9 2>&1 | tee log.config
+    make VERBOSE=1 2>&1 | tee log.make
+    make install 2>&1 | tee log.install
+    #
+    echo "# Set environment variables for lua" >> /etc/profile.d/02-lua.sh
+    echo "export PATH=\"/opt/lua/5.1.4.9/bin:\$PATH\"" >> /etc/profile.d/02-lua.sh
+    echo "export LD_LIBRARY_PATH=\"/opt/lua/5.1.4.9/lib:\$LD_LIBRARY_PATH\"" >> /etc/profile.d/02-lua.sh
+    echo "export CPATH=\"/opt/lua/5.1.4.9/include:\$CPATH\"" >> /etc/profile.d/02-lua.sh
+    echo "export MANPATH=\"/opt/lua/5.1.4.9/man:\$MANPATH\"" >> /etc/profile.d/02-lua.sh
+    #
+    source /etc/profile.d/02-lua.sh
+}
+
+
+set -x
+set -e
+
 
 install_basics
+
+echo -e "\n##\n##\nInstalled system base environment\n##\n##"
+sleep 20
 
 if $EAP_AUTH ; then
     setup_eap_auth_and_env
@@ -345,19 +383,32 @@ fi
 
 if $INSTALL_SPACK_REQUIREMENTS ; then
     install_spack_prereq
+    echo -e "\n##\n##\nInstalled spack prerequisites\n##\n##"
+    sleep 20
 else
     echo "skipping spack prerequisites install"
 fi
 
 if $INSTALL_INTEL ; then
     install_intel
+    echo -e "\n##\n##\nInstalled intel\n##\n##"
+    sleep 20
 else
     echo "Skipping Intel stack installation"
 fi
 
+if $INSTALL_LMOD ; then
+    install_lmod
+    echo -e "\n##\n##\nInstalled lmod\n##\n##"
+    sleep 20
+else
+    apt install -y environment-modules
+fi
 
 if $INSTALL_DOCKER ; then
     installdocker
+    echo -e "\n##\n##\nInstalled docker\n##\n##"
+    sleep 20
 else
     echo "skipping docker install"
 fi
