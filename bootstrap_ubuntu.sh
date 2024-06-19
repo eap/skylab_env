@@ -370,6 +370,20 @@ install_lmod() {
     echo "export MANPATH=\"/opt/lua/5.1.4.9/man:\$MANPATH\"" >> /etc/profile.d/02-lua.sh
     #
     source /etc/profile.d/02-lua.sh
+
+    mkdir -p /opt/lmod/8.7/src
+    cd /opt/lmod/8.7/src
+    wget https://sourceforge.net/projects/lmod/files/Lmod-8.7.tar.bz2
+    tar -xvf Lmod-8.7.tar.bz2
+    cd Lmod-8.7
+    # Note the weird prefix, lmod installs in PREFIX/lmod/X.Y automatically
+    ./configure --prefix=/opt/ \
+                --with-lmodConfigDir=/opt/lmod/8.7/config \
+                2>&1 | tee log.config
+    make install 2>&1 | tee log.install
+    ln -sf /opt/lmod/lmod/init/profile /etc/profile.d/z00_lmod.sh
+    ln -sf /opt/lmod/lmod/init/cshrc /etc/profile.d/z00_lmod.csh
+    ln -sf /opt/lmod/lmod/init/profile.fish /etc/profile.d/z00_lmod.fish
 }
 
 
