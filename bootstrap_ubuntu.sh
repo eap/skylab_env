@@ -213,9 +213,9 @@ install_spack_prereq () {
                  meson \
                  libcurl4-openssl-dev \
                  libssl-dev \
-                 mysql-server=8.0.28-0ubuntu4 \
-                 libmysqlclient-dev=8.0.28-0ubuntu4 \
-                 libmysqlclient21=8.0.28-0ubuntu4 \
+                 mysql-server \
+                 libmysqlclient-dev \
+                 libmysqlclient21 \
                  python3-dev
 
 apt install -y qtbase5-dev \
