@@ -42,6 +42,7 @@ print_help () {
 # Default values for flags
 INSTALL_SPACK_REQUIREMENTS="not-set"
 INSTALL_INTEL=false
+INSTALL_INTEL_HPC=false
 INSTALL_DOCKER=false
 EAP_AUTH=false
 INSTALL_LMOD=false
@@ -66,6 +67,10 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --intel|-i)
             INSTALL_INTEL=true
+            shift 1
+            ;;
+        --intelhpc|-ih)
+            INSTALL_INTEL_HPC=true
             shift 1
             ;;
         --nointel)
@@ -194,31 +199,25 @@ install_spack_prereq () {
                 gcc \
                 g++ \
                 gfortran \
-                gdb
+                gdb \
+                build-essential \
+                libkrb5-dev \
+                m4 \
+                automake \
+                cmake \
+                xterm \
+                autopoint \
+                texlive \
+                gettext \
+                meson \
+                libcurl4-openssl-dev \
+                libssl-dev \
+                mysql-server \
+                libmysqlclient-dev \
+                libmysqlclient21 \
+                python3-dev
 
-    #echo "installing environment modules"
-    # Done in a separate section
-    #apt install -y lmod
-    #apt install -y environment-modules
-
-    apt install -y build-essential \
-                 libkrb5-dev \
-                 m4 \
-                 automake \
-                 cmake \
-                 xterm \
-                 autopoint \
-                 texlive \
-                 gettext \
-                 meson \
-                 libcurl4-openssl-dev \
-                 libssl-dev \
-                 mysql-server \
-                 libmysqlclient-dev \
-                 libmysqlclient21 \
-                 python3-dev
-
-apt install -y qtbase5-dev \
+    apt install -y qtbase5-dev \
                qt5-qmake \
                libqt5svg5-dev \
                qt5dxcb-plugin
@@ -271,6 +270,14 @@ install_after_download() {
         echo "Download for $description failed."
         exit 1
     fi
+}
+
+install_intel_hpc() {
+    # Intel compiler
+    wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+    echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
+    apt-get update
+    apt-get install -y intel-hpckit-runtime-2023.2.0/all
 }
 
 install_intel() {
@@ -395,6 +402,14 @@ if $INSTALL_INTEL ; then
     sleep 20
 else
     echo "Skipping Intel stack installation"
+fi
+
+if $INSTALL_INTEL_HPC ; then
+    install_intel_hpc
+    echo -e "\n##\n##\nInstalled intel HPC packages\n##\n##"
+    sleep 20
+else
+    echo "skipped intel hpc packages"
 fi
 
 if $INSTALL_LMOD ; then
