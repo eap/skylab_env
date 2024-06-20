@@ -282,6 +282,13 @@ install_intel_hpc() {
 
 install_intel() {
 
+    if [ -d "/opt/intel" ]; then
+      mv /opt/intel /opt/intel-old
+    fi
+    if [ -d "/var/intel" ]; then
+      mv /var/intel /var/intel-old
+    fi
+
     # Following instructions from https://github.com/JCSDA-internal/jedi-tools/ : CI-tools/selfhosted/CI-testing-spack-stack-selfhosted-ubuntu-ci-x86_64.txt
     mkdir -p /opt/intel/src
     pushd /opt/intel/src
